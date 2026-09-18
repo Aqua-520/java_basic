@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工信息管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 30px;
+            color: #333;
+            padding: 10px 0;
+            border-bottom: 2px solid #e8e8e8;
+            font-weight: bold;
+            font-family: "隶书";
+        }
+
+        .search-item label {
+            font-size: 14px;
+            color: #666;
+            min-width: 50px;
+        }
+
+        input[type="text"], select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+            outline: none;
+            margin-right: 20px;
+        }
+
+        select {
+            background-color: #fff;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-right: 20px;
+        }
+
+        .btn-primary {
+            background-color: #1890ff;
+            color: white;
+        }
+
+        .btn-default {
+            background-color: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        th {
+            background-color: #fafafa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <h1>员工信息管理</h1>
+
+    <!-- 搜索区域 -->
+    <label for="name">姓名：</label>
+    <input type="text" id="name" v-model="name" placeholder="请输入姓名">
+
+    <label for="gender">性别：</label>
+    <select id="gender" v-model="gender">
+        <option value="">请选择</option>
+        <option value="1">男</option>
+        <option value="2">女</option>
+    </select>
+
+    <label for="job">职位：</label>
+    <select id="job" v-model="job">
+        <option value="">请选择</option>
+        <option value="1">班主任</option>
+        <option value="2">讲师</option>
+        <option value="3">学工主管</option>
+        <option value="4">教研主管</option>
+        <option value="5">咨询师</option>
+    </select>
+
+    <button class="btn btn-primary" @click="search">查询</button>
+    <button class="btn btn-default" @click="clear">清空</button>
+
+    <!-- 表格区域 -->
+    <table>
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>姓名</th>
+            <th>头像</th>
+            <th>性别</th>
+            <th>职位</th>
+            <th>入职日期</th>
+            <th>更新时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(emp, index) in empList" :key="emp.id">
+            <td>{{index + 1}}</td>
+            <td>{{emp.name}}</td>
+            <td><img :src="emp.image" :alt="emp.name" class="avatar"></td>
+            <td>{{emp.gender == 1 ? '男' : '女'}}</td>
+            <td>
+                <span v-if="emp.job == 1">班主任</span>
+                <span v-else-if="emp.job == 2">讲师</span>
+                <span v-else-if="emp.job == 3">学工主管</span>
+                <span v-else-if="emp.job == 4">教研主管</span>
+                <span v-else-if="emp.job == 5">咨询师</span>
+                <span v-else>其他</span>
+            </td>
+            <td>{{emp.entryDate}}</td>
+            <td>{{emp.updateTime}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="http://localhost:7890/axios.min.js"></script>
+<script type="module">
+    // 导入vue包
+    import {createApp} from 'http://localhost:7890/vue.esm-browser.js'
+
+    createApp({
+        //数据
+        data() {
+            return {
+                name: '',
+                gender: '',
+                job: '',
+                empList: [],
+            }
+        },
+        //方法
+        methods: {
+            // 获取员工列表
+            async search() {
+                const response = await axios.get(`http://localhost:7890/emps/list?name=${this.name}&gender=${this.gender}&job=${this.job}`);
+                this.empList = response.data
+            },
+            // 重置搜索
+            clear() {
+                this.name = '';
+                this.gender = '';
+                this.job = '';
+                this.search()
+            }
+        },
+        // 页面加载时获取数据
+        mounted() {
+            this.search()
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>
